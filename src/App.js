@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { CONTRACT_ADDRESS, transformCharacterData } from './constants';
 import myEpicGame from './utils/MyEpicGame.json';
-import { ethers } from 'ethers'; import twitterLogo from './assets/twitter-logo.svg';
+import { ethers } from 'ethers';
+import twitterLogo from './assets/twitter-logo.svg';
 import SelectCharacter from "./Components/SelectCharacter";
 import './App.css';
 
@@ -90,6 +91,7 @@ const App = () => {
       const gameContract = new ethers.Contract(CONTRACT_ADDRESS, myEpicGame.abi, signer);
 
       const txn = await gameContract.checkIfUserHasNft();
+      console.log(txn);
       if (txn.name) {
         console.log('User has character NFT');
         setCharacterNFT(transformCharacterData(txn));
