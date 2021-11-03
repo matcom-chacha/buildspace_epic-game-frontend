@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import twitterLogo from './assets/twitter-logo.svg';
+import { CONTRACT_ADDRESS, transformCharacterData } from './constants';
+import myEpicGame from './utils/MyEpicGame.json';
+import { ethers } from 'ethers'; import twitterLogo from './assets/twitter-logo.svg';
 import SelectCharacter from "./Components/SelectCharacter";
 import './App.css';
 
@@ -75,6 +77,34 @@ const App = () => {
   useEffect(() => {
     checkIfWalletIsConnected();
   }, []);
+
+  //We are declaring the function to run inside our hook. We have to do this because useEffect + async don't play well together
+  useEffect(() => {
+    const fetchNFTMetadata = async () => {
+      console.log('Checking for character NFT on address:', currentAccount);
+
+      //setting up Ethers object and calling the contract
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      //create the connection to our contract. It needs: the contract's address, ABI file, and a signer. These are the three things we always need to communicate with contracts on the blockchain.
+      const gameContract = new ethers.Contract(CONTRACT_ADDRESS, myEpicGame.abi, signer);
+
+      const txn = await gameContract.checkIfUserHasNft();
+      if (txn.name) {
+        console.log('User has character NFT');
+        setCharacterNFT(transformCharacterData(txn));
+      }
+      else {
+        console.log('No character NFT found');
+      }
+    };
+
+    //only run this when a connect wallet exits
+    if (currentAccount) {
+      console.log('Current Account:', currentAccount);
+      fetchNFTMetadata();
+    }
+  }, [currentAccount]);
 
   const renderContent = () => {
     //Scenario #1: user has has not connected to the app - Show Connect To Wallet Button
