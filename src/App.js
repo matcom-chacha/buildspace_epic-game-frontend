@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import twitterLogo from './assets/twitter-logo.svg';
+import SelectCharacter from "./Components/SelectCharacter";
 import './App.css';
 
 // Constants
@@ -11,6 +12,7 @@ const MyTWITTER_LINK = `https://twitter.com/${MyTWITTER_HANDLE}`;
 const App = () => {
   //a state variable to store our user's public wallet
   const [currentAccount, setCurrentAccount] = useState(null);
+  const [characterNFT, setCharacterNFT] = useState(null);
 
   //action that will run on component load
   const checkIfWalletIsConnected = async () => {
@@ -74,24 +76,36 @@ const App = () => {
     checkIfWalletIsConnected();
   }, []);
 
+  const renderContent = () => {
+    //Scenario #1: user has has not connected to the app - Show Connect To Wallet Button
+    if (!currentAccount) {
+      return (
+        <div className="connect-wallet-container">
+          <img
+            src="https://c.tenor.com/lvFeGllZtX0AAAAC/friends-ross.gif"
+            alt="Monty Python Gif"
+          />
+          <button
+            className="cta-button connect-wallet-button"
+            onClick={connectWalletAction}
+          >
+            Connect Wallet to Get Started
+            </button>
+        </div>
+      );
+    }//Scenario #2: user has connected to the app AND does not have a character NFT - Show SelectCharacter Component
+    else if (currentAccount && !characterNFT) {
+      return <SelectCharacter setCharacerNFT={setCharacterNFT} />;
+    }
+  };
+
   return (
     <div className="App">
       <div className="container">
         <div className="header-container">
           <p className="header gradient-text">⚔️ Is the final countdown ⚔️</p>
           <p className="sub-text">Team up to defeat the greatest of all series!</p>
-          <div className="connect-wallet-container">
-            <img
-              src="https://c.tenor.com/lvFeGllZtX0AAAAC/friends-ross.gif"
-              alt="Monty Python Gif"
-            />
-            <button
-              className="cta-button connect-wallet-button"
-              onClick={connectWalletAction}
-            >
-              Connect Wallet to Get Started
-            </button>
-          </div>
+          {renderContent()}
         </div>
         <div className="footer-container">
           <img alt="Twitter Logo" className="twitter-logo" src={twitterLogo} />
