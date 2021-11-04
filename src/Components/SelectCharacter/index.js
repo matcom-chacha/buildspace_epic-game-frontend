@@ -6,21 +6,7 @@ import myEpicGame from '../../utils/MyEpicGame.json';
 
 const SelectCharacter = ({ setCharacterNFT }) => {
     const [characters, setCharacters] = useState([]);
-    const [gameContract, setGameContract] = useState([]);
-
-    const mintCharacterNFTAction = (characterId) => async () => {
-        try {
-            if (gameContract) {
-                console.log('Minting character in progress...');
-                const mintTxn = await gameContract.mintCharacterNFT(characterId);
-                await mintTxn.wait();
-                console.log('mintTxn:', mintTxn);
-            }
-        }
-        catch (error) {
-            console.warn('MintCharacterAction Error:', error);
-        }
-    };
+    const [gameContract, setGameContract] = useState(null);
 
     useEffect(() => {
         const { ethereum } = window;
@@ -65,9 +51,10 @@ const SelectCharacter = ({ setCharacterNFT }) => {
 
             //fetch metadata, set the state and move to the arena
             if (gameContract) {
-                const characterNFT = await gameContract.checkIfUserHasNFT();
+                console.log(gameContract);
+                const characterNFT = await gameContract.checkIfUserHasNft();
                 console.log('CharacterNFT:', characterNFT);
-                alert(`Your NFT is all done -- see it here: https://testnets.opensea.io/assets/${gameContract}/${tokenId.toNumber()}`)
+                alert(`Your NFT is all done -- see it here: https://testnets.opensea.io/assets/${CONTRACT_ADDRESS}/${tokenId.toNumber()}`)
                 setCharacterNFT(transformCharacterData(characterNFT));
             }
         };
@@ -85,6 +72,20 @@ const SelectCharacter = ({ setCharacterNFT }) => {
             }
         };
     }, [gameContract]);
+
+    const mintCharacterNFTAction = (characterId) => async () => {
+        try {
+            if (gameContract) {
+                console.log('Minting character in progress...');
+                const mintTxn = await gameContract.mintCharacterNFT(characterId);
+                await mintTxn.wait();
+                console.log('mintTxn:', mintTxn);
+            }
+        }
+        catch (error) {
+            console.warn('MintCharacterAction Error:', error);
+        }
+    };
 
     const renderCharacters = () =>
         characters.map((character, index) => (

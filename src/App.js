@@ -127,7 +127,7 @@ const App = () => {
       );
     }//Scenario #2: user has connected to the app AND does not have a character NFT - Show SelectCharacter Component
     else if (currentAccount && !characterNFT) {
-      return <SelectCharacter setCharacerNFT={setCharacterNFT} />;
+      return <SelectCharacter setCharacterNFT={setCharacterNFT} />;
     }
   };
 
