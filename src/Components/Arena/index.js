@@ -9,6 +9,7 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
     const [gameContract, setGameContract] = useState(null);
     const [boss, setBoss] = useState(null);
     const [attackState, setAttackState] = useState('');
+    const [showToast, setShowToast] = useState(false);
 
     const runAttackAction = async () => {
         try {
@@ -20,6 +21,11 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
                 await attackTxn.wait();
                 console.log('attackTxn:', attackTxn);
                 setAttackState('hit');
+                //set showToast to true and the =n false 5 seconds later
+                setShowToast(true);
+                setTimeout(() => {
+                    setShowToast(false);
+                }, 5000);
             }
         }
         catch (error) {
@@ -89,6 +95,11 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
     return (
         <div className="arena-container">
             {/* Boss */}
+            {boss && characterNFT && (
+                <div id="toast" className={showToast ? 'show' : ''}>
+                    <div id="desc">{`💥 ${boss.name} was hit for ${characterNFT.charismaP}!`}</div>
+                </div>
+            )}
             {boss && (
                 <div className="boss-container">
                     <div className={`boss-content ${attackState}`}>
@@ -137,6 +148,10 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
                             </div>
                         </div>
                     </div>
+                    {/* <div className="active-players">
+                            <h2>Active Players</h2>
+                            <div className="players-list">{renderActivePlayersList()}</div>
+                        </div> */}
                 </div>
             )}
         </div>
