@@ -4,6 +4,7 @@ import myEpicGame from './utils/MyEpicGame.json';
 import { ethers } from 'ethers';
 import twitterLogo from './assets/twitter-logo.svg';
 import SelectCharacter from "./Components/SelectCharacter";
+import Arena from "./Components/Arena";
 import './App.css';
 
 // Constants
@@ -128,6 +129,9 @@ const App = () => {
     }//Scenario #2: user has connected to the app AND does not have a character NFT - Show SelectCharacter Component
     else if (currentAccount && !characterNFT) {
       return <SelectCharacter setCharacterNFT={setCharacterNFT} />;
+    }//Scenario #3: user has connected to the app AND does have a character NFT 
+    else if (currentAccount && characterNFT) {
+      return <Arena characterNFT={characterNFT} />;
     }
   };
 
