@@ -131,7 +131,7 @@ const App = () => {
       return <SelectCharacter setCharacterNFT={setCharacterNFT} />;
     }//Scenario #3: user has connected to the app AND does have a character NFT 
     else if (currentAccount && characterNFT) {
-      return <Arena characterNFT={characterNFT} />;
+      return <Arena characterNFT={characterNFT} setCharacterNFT={setCharacterNFT} />;
     }
   };
 

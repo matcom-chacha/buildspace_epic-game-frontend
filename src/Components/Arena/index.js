@@ -4,11 +4,28 @@ import { CONTRACT_ADDRESS, transformCharacterData } from '../../constants';
 import myEpicGame from '../../utils/MyEpicGame.json';
 import './Arena.css';
 
-const Arena = ({ characterNFT }) => {
+const Arena = ({ characterNFT, setCharacterNFT }) => {
     const [gameContract, setGameContract] = useState(null);
     const [boss, setBoss] = useState(null);
+    const [attackState, setAttackState] = useState('');
 
-    const runAttackAction = async () => { };
+    const runAttackAction = async () => {
+        try {
+            if (gameContract) {
+                setAttackState('attacking');
+                console.log('Attacking boss...');
+                const attackTxn = await gameContract.attackBoss();
+                //o tell our UI to not do anything until our transaction has been mined
+                await attackTxn.wait();
+                console.log('attackTxn:', attackTxn);
+                setAttackState('hit');
+            }
+        }
+        catch (error) {
+            console.log('Error attacking boss:', error);
+            setAttackState('');
+        }
+    };
 
     useEffect(() => {
         //async function to get boss data from the sm and set the corresponding state
@@ -18,9 +35,34 @@ const Arena = ({ characterNFT }) => {
             setBoss(transformCharacterData(bossTxn));
         };
 
+        const onAttackComplete = (newBossAr, newPlayerAr) => {
+            const bossAr = newBossAr.toNumber();
+            const playerAr = newPlayerAr.toNumber();
+
+            console.log(`Attack complete: Boss Ar: ${bossAr} Player Ar: ${playerAr}`);
+
+            //update both player and boss Ar
+            setBoss((prevState) => {
+                return { ...prevState, ar: bossAr };
+            });
+
+            setCharacterNFT((prevState) => {
+                return { ...prevState, ar: playerAr };
+            });
+        };
+
         if (gameContract) {
             //gameContract is set, fetch the boss
             fetchBoss();
+
+            gameContract.on('AttackComplete', onAttackComplete);
+        }
+
+        //clean the event when the componente is removed
+        return () => {
+            if (gameContract) {
+                gameContract.off('AttackComplete', onAttackComplete);
+            }
         }
     }, [gameContract]);
 
@@ -48,7 +90,7 @@ const Arena = ({ characterNFT }) => {
             {/* Boss */}
             {boss && (
                 <div className="boss-container">
-                    <div className={`boss-content`}>
+                    <div className={`boss-content ${attackState}`}>
                         <h2>🔥 {boss.name} 🔥</h2>
                         <div className="image-content">
                             <img src={boss.imageURI} alt={`Boss ${boss.name}`} />
