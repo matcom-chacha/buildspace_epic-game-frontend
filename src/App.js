@@ -5,6 +5,7 @@ import { ethers } from 'ethers';
 import twitterLogo from './assets/twitter-logo.svg';
 import SelectCharacter from "./Components/SelectCharacter";
 import Arena from "./Components/Arena";
+import LoadingIndicator from './Components/LoadingIndicator';
 import './App.css';
 
 // Constants
@@ -17,6 +18,7 @@ const App = () => {
   //a state variable to store our user's public wallet
   const [currentAccount, setCurrentAccount] = useState(null);
   const [characterNFT, setCharacterNFT] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   //action that will run on component load
   const checkIfWalletIsConnected = async () => {
@@ -26,6 +28,7 @@ const App = () => {
 
       if (!ethereum) {
         console.log('Make sure you have MetaMask!');
+        setIsLoading(false);
         return;
       }
       else {
@@ -49,6 +52,7 @@ const App = () => {
     catch (error) {
       console.log(error);
     }
+    setIsLoading(false);
   };
 
   const connectWalletAction = async () => {
@@ -77,6 +81,8 @@ const App = () => {
 
   //run our function when the page loads
   useEffect(() => {
+    //set isLoading every time the component mounts
+    setIsLoading(true);
     checkIfWalletIsConnected();
   }, []);
 
@@ -100,6 +106,8 @@ const App = () => {
       else {
         console.log('No character NFT found');
       }
+
+      setIsLoading(false);
     };
 
     //only run this when a connect wallet exits
@@ -110,6 +118,9 @@ const App = () => {
   }, [currentAccount]);
 
   const renderContent = () => {
+    if (isLoading) {
+      return <LoadingIndicator />;
+    }
     //Scenario #1: user has has not connected to the app - Show Connect To Wallet Button
     if (!currentAccount) {
       return (
