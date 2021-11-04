@@ -8,6 +8,20 @@ const SelectCharacter = ({ setCharacterNFT }) => {
     const [characters, setCharacters] = useState([]);
     const [gameContract, setGameContract] = useState([]);
 
+    const mintCharacterNFTAction = (characterId) => async () => {
+        try {
+            if (gameContract) {
+                console.log('Minting character in progress...');
+                const mintTxn = await gameContract.mintCharacterNFT(characterId);
+                await mintTxn.wait();
+                console.log('mintTxn:', mintTxn);
+            }
+        }
+        catch (error) {
+            console.warn('MintCharacterAction Error:', error);
+        }
+    };
+
     useEffect(() => {
         const { ethereum } = window;
 
@@ -33,24 +47,43 @@ const SelectCharacter = ({ setCharacterNFT }) => {
                 console.log('Getting contract characters to mint');
                 //calling contract to get all characters 
                 const charactersTxn = await gameContract.getAllDefaultCharacters();
-                console.log("already made the call");
-                console.log('charactersTxn:', charactersTxn);
 
                 //go through all character and transform the data
                 const characters = charactersTxn.map((characterData) => transformCharacterData(characterData));
 
                 console.log("Characters", characters);
                 setCharacters(characters);
-                console.log(characters.length);
             }
             catch (error) {
                 console.log('Something went wrong fetching characters:', error);
             }
         };
 
+        //a callback method that will fire when this events is received
+        const onCharacterMint = async (sender, tokenId, characterIndex) => {
+            console.log(`CharacterNFTMinted - sender: ${sender} tokenId: ${tokenId.toNumber()} characterIndex: ${characterIndex.toNumber()}`);
+
+            //fetch metadata, set the state and move to the arena
+            if (gameContract) {
+                const characterNFT = await gameContract.checkIfUserHasNFT();
+                console.log('CharacterNFT:', characterNFT);
+                alert(`Your NFT is all done -- see it here: https://testnets.opensea.io/assets/${gameContract}/${tokenId.toNumber()}`)
+                setCharacterNFT(transformCharacterData(characterNFT));
+            }
+        };
+
         if (gameContract) {
             getCharacters();
+
+            //setup NFT Minted Listener
+            gameContract.on('CharacterNFTMinted', onCharacterMint);
         }
+
+        return () => {
+            if (gameContract) {
+                gameContract.off('CharacterNFTMinted', onCharacterMint);
+            }
+        };
     }, [gameContract]);
 
     const renderCharacters = () =>
@@ -63,7 +96,7 @@ const SelectCharacter = ({ setCharacterNFT }) => {
                 <button
                     type="button"
                     className="character-mint-button"
-                // onClick={mintCharacterNFTAction(index)}
+                    onClick={mintCharacterNFTAction(index)}
                 >{`Mint ${character.name}`}</button>
             </div>
         ));
